@@ -1,10 +1,22 @@
 import React, { Component, Fragment } from 'react';
 
 class QuoteData extends Component{
+    
+    shareOnTwitter =(text,url) =>{
+        
+        window.open('http://twitter.com/share?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text), '', 'left=0,top=0,width=550,height=450,personalbar=0,toolbar=0,scrollbars=0,resizable=0');
+
+    }
+
     render() {
         return(
-            <div>
-                {this.props.qdata.content}
+            <div >
+                <a href={this.props.qdata.link} id="text" dangerouslySetInnerHTML={{
+                __html: this.props.qdata.content
+                }} />
+                <p id="author">- {this.props.qdata.title}</p>
+                <br />
+                <button onClick={()=>this.shareOnTwitter(this.props.qdata.content,this.props.qdata.link)}>Share</button>
             </div>
         )
     }
@@ -21,19 +33,22 @@ class QuoteMachine extends Component {
             },
             hasQuote:false
         }
-        this.END_POINT='https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1'
+        this.END_POINT='https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=42'
     }
     
     getRandomQuote=(event)=> {
+        let i = Math.floor(Math.random()*42);
         fetch(this.END_POINT)
         .then(response=>response.json())
         .then(data=>{
-            if(data[0].content && data[0].title && data[0].link) {
+            console.log(i)
+            console.log(data)
+            if(data[i].content && data[i].title && data[i].link) {
                 this.setState({
                     quote:{
-                        content: data[0].content,
-                        link:data[0].link,
-                        title: data[0].title
+                        content: data[i].content,
+                        link:data[i].link,
+                        title: data[i].title
                     }
                 })
                 if(this.state.hasQuote===false) {
@@ -46,15 +61,15 @@ class QuoteMachine extends Component {
         })
     }
     render() {
-        console.log(this.state)
+        // console.log(this.state)
         
         return (
-            <Fragment>
+            <div id="quote-box">
                 <h1>Quote Machine</h1>
                 <button onClick={this.getRandomQuote}>New Quote</button>
                 <br />
                 {this.state.hasQuote===true ? <QuoteData qdata={this.state.quote}/>:'No quote Yet'}
-            </Fragment>
+            </div>
         );
     }
 }
